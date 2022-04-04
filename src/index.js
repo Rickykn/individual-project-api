@@ -19,7 +19,10 @@ app.get("/", (req, res) => {
   res.send("<h1>Pict perfect API</h1>");
 });
 const { authRoutes } = require("./routes");
-
+app.use(
+  "/profile_images",
+  express.static(`${__dirname}/public/profile-picture`)
+);
 app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {

@@ -1,18 +1,12 @@
 const { Op } = require("sequelize");
 const { User } = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
+const fs = require("fs");
 
 const authControllers = {
   registerUser: async (req, res) => {
     try {
-      const {
-        username,
-        email,
-        password,
-        repeatPassword,
-        bio,
-        profile_picture,
-      } = req.body;
+      const { username, email, password, repeatPassword } = req.body;
 
       const isUsernameEmailTaken = await User.findOne({
         where: {
@@ -31,13 +25,12 @@ const authControllers = {
           message: "Username and Email has been taken",
         });
       }
+
       const hashedPassword = bcrypt.hashSync(password, 5);
       await User.create({
         username,
         email,
-        profile_picture,
         password: hashedPassword,
-        bio,
       });
 
       return res.status(201).json({
@@ -45,6 +38,7 @@ const authControllers = {
       });
     } catch (err) {
       console.log(err);
+      fs.unlinkSync(__dirname + "/../public/posts/" + req.file.filename);
       res.status(500).json({
         message: "Server Error",
       });
