@@ -6,19 +6,13 @@ const fs = require("fs");
 const authControllers = {
   registerUser: async (req, res) => {
     try {
-      const { username, email, password, repeatPassword } = req.body;
+      const { username, email, password } = req.body;
 
       const isUsernameEmailTaken = await User.findOne({
         where: {
           [Op.or]: [{ username }, { email }],
         },
       });
-
-      if (!(password === repeatPassword)) {
-        return res.status(400).json({
-          message: "Password and the repeat password has to be the same",
-        });
-      }
 
       if (isUsernameEmailTaken) {
         return res.status(400).json({
@@ -38,7 +32,6 @@ const authControllers = {
       });
     } catch (err) {
       console.log(err);
-      fs.unlinkSync(__dirname + "/../public/posts/" + req.file.filename);
       res.status(500).json({
         message: "Server Error",
       });
