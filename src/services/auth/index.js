@@ -1,11 +1,11 @@
+const Service = require("../service");
+const { User } = require("../../lib/sequelize");
 const { Op } = require("sequelize");
-const { User } = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
-const fs = require("fs");
-const { generateToken } = require("../lib/jwt");
+const { generateToken } = require("../../lib/jwt");
 
-const authControllers = {
-  registerUser: async (req, res) => {
+class authService extends Service {
+  static register = async (req) => {
     try {
       const { username, email, password } = req.body;
 
@@ -16,29 +16,34 @@ const authControllers = {
       });
 
       if (isUsernameEmailTaken) {
-        return res.status(400).json({
+        return this.handleError({
           message: "Username and Email has been taken",
+          statusCode: 400,
         });
       }
 
       const hashedPassword = bcrypt.hashSync(password, 5);
-      await User.create({
+      const newUser = await User.create({
         username,
         email,
         password: hashedPassword,
       });
 
-      return res.status(201).json({
-        message: "Registered user",
+      return this.handleSuccess({
+        message: "Registered User",
+        statusCode: 201,
+        data: newUser,
       });
     } catch (err) {
       console.log(err);
-      res.status(500).json({
+
+      this.handleError({
         message: "Server Error",
+        statusCode: 500,
       });
     }
-  },
-  loginUser: async (req, res) => {
+  };
+  static login = async (req) => {
     try {
       const { username, password } = req.body;
 
@@ -49,16 +54,18 @@ const authControllers = {
       });
 
       if (!findUser) {
-        return res.status(400).json({
+        return this.handleError({
           message: "Wrong username or password",
+          statusCode: 400,
         });
       }
 
       const isPasswordCorrect = bcrypt.compareSync(password, findUser.password);
 
       if (!isPasswordCorrect) {
-        return res.status(400).json({
-          message: "Wrong username or password",
+        return this.handleError({
+          message: "wrong username or password",
+          statusCode: 400,
         });
       }
 
@@ -69,21 +76,23 @@ const authControllers = {
         role: findUser.role,
       });
 
-      return res.status(200).json({
+      return this.handleSuccess({
         message: "Logged in user",
-        result: {
+        statusCode: 200,
+        data: {
           user: findUser,
           token,
         },
       });
     } catch (err) {
       console.log(err);
-      res.status(500).json({
+      return this.handleError({
         message: "Server Error",
+        statusCode: 500,
       });
     }
-  },
-  keepLogin: async (req, res) => {
+  };
+  static keepLogin = async (req) => {
     try {
       const { token } = req;
 
@@ -93,20 +102,23 @@ const authControllers = {
 
       delete findUser.dataValues.password;
 
-      return res.status(200).json({
+      return this.handleSuccess({
         message: "Renewed user token",
-        result: {
+        statusCode: 200,
+        data: {
           user: findUser,
           token: renewedToken,
         },
       });
     } catch (err) {
       console.log(err);
-      return res.status(500).json({
-        message: "Server error",
+
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
       });
     }
-  },
-};
+  };
+}
 
-module.exports = authControllers;
+module.exports = authService;
