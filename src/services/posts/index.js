@@ -22,8 +22,6 @@ class PostService extends Service {
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
       });
 
-      console.log(findPosts);
-
       if (!findPosts.rows.length) {
         return this.handleError({
           message: "No posts found",
@@ -47,6 +45,7 @@ class PostService extends Service {
   static createNewPost = async (req) => {
     try {
       const { caption, location } = req.body;
+      const { token } = req;
 
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "post_images";
@@ -56,7 +55,7 @@ class PostService extends Service {
         image_url: `${uploadFileDomain}/${filePath}/${filename}`,
         caption,
         location,
-        // user_id: req.token.id
+        user_id: token.id,
       });
 
       return this.handleSuccess({

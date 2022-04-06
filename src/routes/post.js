@@ -1,6 +1,7 @@
 const PostService = require("../services/posts");
 const fileUploader = require("../lib/uploader");
 const router = require("express").Router();
+const { authorizedLoggedInUser } = require("../middlewares/authMiddleware");
 
 router.get("/", async (req, res) => {
   try {
@@ -21,6 +22,7 @@ router.get("/", async (req, res) => {
 
 router.post(
   "/",
+  authorizedLoggedInUser,
   fileUploader({
     destinationFolder: "posts",
     fileType: "image",
