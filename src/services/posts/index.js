@@ -1,5 +1,6 @@
 const Service = require("../service");
-const { Post } = require("../../lib/sequelize");
+const { Post, User } = require("../../lib/sequelize");
+const fs = require("fs");
 
 class PostService extends Service {
   static getAllPosts = async (req) => {
@@ -23,7 +24,7 @@ class PostService extends Service {
 
       console.log(findPosts);
 
-      if (!findPosts.length) {
+      if (!findPosts.rows.length) {
         return this.handleError({
           message: "No posts found",
           statusCode: 400,
@@ -35,6 +36,37 @@ class PostService extends Service {
         data: findPosts,
       });
     } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static createNewPost = async (req) => {
+    try {
+      const { caption, location } = req.body;
+
+      const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+      const filePath = "post_images";
+      const { filename } = req.file;
+
+      const newPost = await Post.create({
+        image_url: `${uploadFileDomain}/${filePath}/${filename}`,
+        caption,
+        location,
+        // user_id: req.token.id
+      });
+
+      return this.handleSuccess({
+        message: "Post Created",
+        statusCode: 201,
+        data: newPost,
+      });
+    } catch (err) {
+      console.log(err);
+      fs.unlinkSync(__dirname + "/../public/posts/" + req.file.filename);
       return this.handleError({
         message: "Server Error",
         statusCode: 500,
