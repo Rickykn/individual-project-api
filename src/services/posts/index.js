@@ -1,6 +1,7 @@
 const Service = require("../service");
 const { Post, User } = require("../../lib/sequelize");
 const fs = require("fs");
+const res = require("express/lib/response");
 
 class PostService extends Service {
   static getAllPosts = async (req) => {
@@ -66,6 +67,26 @@ class PostService extends Service {
     } catch (err) {
       console.log(err);
       fs.unlinkSync(__dirname + "/../public/posts/" + req.file.filename);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+  static deletePostById = async (req) => {
+    try {
+      const { id } = req.params;
+      await Post.destroy({
+        where: {
+          id,
+        },
+      });
+      return this.handleSuccess({
+        message: "Deleted Success",
+        statusCode: 200,
+      });
+    } catch (err) {
+      console.log(err);
       return this.handleError({
         message: "Server Error",
         statusCode: 500,
