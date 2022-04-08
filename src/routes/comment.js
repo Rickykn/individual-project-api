@@ -2,9 +2,9 @@ const CommentService = require("../services/comment");
 const router = require("express").Router();
 const { authorizedLoggedInUser } = require("../middlewares/authMiddleware");
 
-router.get("/:userId", async (req, res) => {
+router.get("/:postId", async (req, res) => {
   try {
-    const serviceResult = await CommentService.getCommentByUserId(req);
+    const serviceResult = await CommentService.getCommentByPostId(req);
 
     if (!serviceResult.success) throw serviceResult;
 

@@ -1,19 +1,20 @@
-const { Comment } = require("../../lib/sequelize");
+const { Comment, User } = require("../../lib/sequelize");
 const Service = require("../service");
 
 class CommentService extends Service {
-  static getCommentByUserId = async (req) => {
+  static getCommentByPostId = async (req) => {
     try {
-      const { userId } = req.params;
+      const { postId } = req.params;
 
-      const findCommentByUserId = await Comment.findAll({
-        where: { user_id: userId },
+      const findCommentByPostId = await Comment.findAll({
+        where: { post_id: postId },
+        include: User,
       });
 
       return this.handleSuccess({
         message: "Find Comment",
         statusCode: 200,
-        data: findCommentByUserId,
+        data: findCommentByPostId,
       });
     } catch (err) {
       return this.handleError({
