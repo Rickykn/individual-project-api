@@ -20,6 +20,7 @@ class PostService extends Service {
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
         include: User,
+        distinct: true,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
       });
 
