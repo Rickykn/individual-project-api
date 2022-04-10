@@ -44,6 +44,35 @@ class PostService extends Service {
     }
   };
 
+  static getPostById = async (req) => {
+    try {
+      const { postId } = req.params;
+
+      const findPost = await Post.findOne({
+        where: {
+          id: postId,
+        },
+        include: User,
+      });
+      if (!findPost) {
+        return this.handleError({
+          message: "No posts found",
+          statusCode: 400,
+        });
+      }
+      return this.handleSuccess({
+        message: "Find all users",
+        data: findPost,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
   static createNewPost = async (req) => {
     try {
       const { caption, location } = req.body;
