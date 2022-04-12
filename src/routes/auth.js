@@ -6,7 +6,7 @@ router.post("/login", async (req, res) => {
   try {
     const serviceResult = await authService.login(req);
 
-    if (!serviceResult) throw serviceResult;
+    if (!serviceResult.success) throw serviceResult;
     return res.status(serviceResult.statusCode || 200).json({
       message: serviceResult.message,
       result: serviceResult.data,

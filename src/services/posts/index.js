@@ -103,6 +103,7 @@ class PostService extends Service {
       });
     }
   };
+
   static deletePostById = async (req) => {
     try {
       const { id } = req.params;
@@ -117,6 +118,41 @@ class PostService extends Service {
       });
     } catch (err) {
       console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static editPostById = async (req) => {
+    try {
+      const { caption } = req.body;
+      const { id } = req.params;
+
+      const findPost = await Post.findByPk(id);
+
+      if (!findPost) {
+        return this.handleError({
+          message: "Post Not Found",
+          statusCode: 400,
+        });
+      }
+
+      const newCaption = await Post.update(
+        { caption },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      return this.handleSuccess({
+        message: "Edited Post",
+        statusCode: 200,
+      });
+    } catch (err) {
       return this.handleError({
         message: "Server Error",
         statusCode: 500,

@@ -45,7 +45,7 @@ class authService extends Service {
   };
   static login = async (req) => {
     try {
-      const { username, password } = req.body;
+      const { username, email, password } = req.body;
 
       const findUser = await User.findOne({
         where: {
