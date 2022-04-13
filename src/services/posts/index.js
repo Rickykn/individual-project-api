@@ -1,5 +1,5 @@
 const Service = require("../service");
-const { Post, User } = require("../../lib/sequelize");
+const { Post, User, Like } = require("../../lib/sequelize");
 const fs = require("fs");
 const res = require("express/lib/response");
 
@@ -19,7 +19,21 @@ class PostService extends Service {
         },
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
-        include: User,
+        include: [
+          {
+            model: User,
+            attributes: ["username"],
+            as: "user_posts",
+          },
+          {
+            model: User,
+            as: "user_likes",
+            where: {
+              id: req.token.id,
+            },
+            required: false,
+          },
+        ],
         distinct: true,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
       });
@@ -52,7 +66,7 @@ class PostService extends Service {
         where: {
           id: postId,
         },
-        include: User,
+        include: { model: User, as: "user_posts" },
       });
       if (!findPost) {
         return this.handleError({
@@ -152,6 +166,74 @@ class PostService extends Service {
         message: "Edited Post",
         statusCode: 200,
       });
+    } catch (err) {
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static addPostLikes = async (req) => {
+    try {
+      const { postId, userId } = req.params;
+      const findUserLike = await Like.findOne({
+        where: {
+          post_id: postId,
+          user_id: userId,
+        },
+      });
+
+      if (findUserLike) {
+        return this.handleError({
+          message: "user already like this post",
+        });
+      }
+
+      await Like.create({
+        post_id: postId,
+        user_id: userId,
+      });
+
+      const postLiked = await Post.findOne({
+        where: {
+          id: postId,
+        },
+      });
+
+      await postLiked.increment("like_count", { by: 1 });
+
+      return this.handleSuccess({
+        message: "Success Likes",
+      });
+    } catch (err) {
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static removePostLikes = async (req) => {
+    try {
+      const { postId, userId } = req.params;
+
+      await Like.destroy({
+        where: {
+          post_id: postId,
+          user_id: userId,
+        },
+      });
+
+      const postLiked = await Post.findOne({
+        where: {
+          id: postId,
+        },
+      });
+
+      await postLiked.decrement("like_count", { by: 1 });
+
+      return this.handleSuccess({ message: "Success unliked" });
     } catch (err) {
       return this.handleError({
         message: "Server Error",

@@ -17,12 +17,20 @@ const Like = require("../models/like")(sequelize);
 const Comment = require("../models/comment")(sequelize);
 
 // 1:M post and user
-Post.belongsTo(User, { foreignKey: "user_id" });
-User.hasMany(Post, { foreignKey: "user_id" });
+Post.belongsTo(User, { foreignKey: "user_id", as: "user_posts" });
+User.hasMany(Post, { foreignKey: "user_id", as: "user_posts" });
 
 // M:M post and user
-Post.belongsToMany(User, { through: Like, foreignKey: "post_id" });
-User.belongsToMany(Post, { through: Like, foreignKey: "user_id" });
+Post.belongsToMany(User, {
+  through: Like,
+  foreignKey: "post_id",
+  as: "user_likes",
+});
+User.belongsToMany(Post, {
+  through: Like,
+  foreignKey: "user_id",
+  as: "user_likes",
+});
 User.hasMany(Like, { foreignKey: "user_id" });
 Like.belongsTo(User, { foreignKey: "user_id" });
 Post.hasMany(Like, { foreignKey: "post_id" });

@@ -3,7 +3,7 @@ const fileUploader = require("../lib/uploader");
 const router = require("express").Router();
 const { authorizedLoggedInUser } = require("../middlewares/authMiddleware");
 
-router.get("/", async (req, res) => {
+router.get("/", authorizedLoggedInUser, async (req, res) => {
   try {
     const serviceResult = await PostService.getAllPosts(req);
 
@@ -85,6 +85,36 @@ router.patch("/:id", async (req, res) => {
     if (!serviceResult.success) throw serviceResult;
 
     return res.status(serviceResult.statusCode || 200).json({
+      message: serviceResult.message,
+    });
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.post("/:postId/likes/:userId", async (req, res) => {
+  try {
+    const serviceResult = await PostService.addPostLikes(req);
+    if (!serviceResult.success) throw serviceResult;
+
+    return res.status(serviceResult.statusCode || 201).json({
+      message: serviceResult.message,
+    });
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.delete("/:postId/likes/:userId", async (req, res) => {
+  try {
+    const serviceResult = await PostService.removePostLikes(req);
+    if (!serviceResult.success) throw serviceResult;
+
+    return res.status(serviceResult.statusCode || 201).json({
       message: serviceResult.message,
     });
   } catch (err) {
