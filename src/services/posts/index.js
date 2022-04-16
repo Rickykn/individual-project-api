@@ -1,7 +1,6 @@
 const Service = require("../service");
 const { Post, User, Like } = require("../../lib/sequelize");
 const fs = require("fs");
-const res = require("express/lib/response");
 
 class PostService extends Service {
   static getAllPosts = async (req) => {
@@ -22,7 +21,6 @@ class PostService extends Service {
         include: [
           {
             model: User,
-            attributes: ["username"],
             as: "user_posts",
           },
           {
