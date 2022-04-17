@@ -64,7 +64,20 @@ class PostService extends Service {
         where: {
           id: postId,
         },
-        include: { model: User, as: "user_posts" },
+        include: [
+          {
+            model: User,
+            as: "user_posts",
+          },
+          {
+            model: User,
+            as: "user_likes",
+            where: {
+              id: req.token.id,
+            },
+            required: false,
+          },
+        ],
       });
       if (!findPost) {
         return this.handleError({

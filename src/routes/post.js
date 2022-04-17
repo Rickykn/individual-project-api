@@ -19,7 +19,7 @@ router.get("/", authorizedLoggedInUser, async (req, res) => {
     });
   }
 });
-router.get("/:postId", async (req, res) => {
+router.get("/:postId", authorizedLoggedInUser, async (req, res) => {
   try {
     const serviceResult = await PostService.getPostById(req);
 
