@@ -8,11 +8,11 @@ class UserService extends Service {
       const { username, fullname, bio } = req.body;
       const { token } = req;
 
-      const findUser = await User.findByPk(token.id);
+      const findUser = await User.findOne({ where: { username } });
 
-      if (!findUser) {
+      if (findUser) {
         return this.handleError({
-          message: "Post Not Found",
+          message: "Username already taken",
           statusCode: 400,
         });
       }
@@ -22,7 +22,7 @@ class UserService extends Service {
 
       console.log(filename);
 
-      const newDataUser = await User.update(
+      await User.update(
         {
           username,
           profile_picture: req.file
@@ -35,8 +35,8 @@ class UserService extends Service {
           where: { id: token.id },
         }
       );
-      console.log(findUser);
-      console.log(newDataUser);
+
+      const newDataUser = await User.findByPk(token.id);
 
       return this.handleSuccess({
         message: "Edited Post",
@@ -69,7 +69,7 @@ class UserService extends Service {
       }
 
       return this.handleSuccess({
-        message: "Edited Post",
+        message: "User Found",
         statusCode: 200,
         data: data,
       });
