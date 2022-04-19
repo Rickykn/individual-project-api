@@ -8,13 +8,14 @@ class UserService extends Service {
       const { username, fullname, bio } = req.body;
       const { token } = req;
 
-      const findUser = await User.findOne({ where: { username } });
-
-      if (findUser) {
-        return this.handleError({
-          message: "Username already taken",
-          statusCode: 400,
-        });
+      if (username) {
+        const findUser = await User.findOne({ where: { username } });
+        if (findUser) {
+          return this.handleError({
+            message: "Username already taken",
+            statusCode: 400,
+          });
+        }
       }
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "profile_images";

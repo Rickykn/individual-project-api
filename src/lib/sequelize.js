@@ -15,10 +15,15 @@ const Post = require("../models/post")(sequelize);
 const User = require("../models/user")(sequelize);
 const Like = require("../models/like")(sequelize);
 const Comment = require("../models/comment")(sequelize);
+const VerificationToken = require("../models/verification_token")(sequelize);
 
 // 1:M post and user
 Post.belongsTo(User, { foreignKey: "user_id", as: "user_posts" });
 User.hasMany(Post, { foreignKey: "user_id", as: "user_posts" });
+
+// 1:M verification and user
+VerificationToken.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(VerificationToken, { foreignKey: "user_id" });
 
 // M:M post and user
 Post.belongsToMany(User, {

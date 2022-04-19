@@ -23,6 +23,10 @@ const User = (sequelize) => {
     bio: {
       type: DataTypes.STRING,
     },
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   });
 };
 
