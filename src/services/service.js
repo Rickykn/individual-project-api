@@ -19,6 +19,13 @@ class Service {
       statusCode,
     };
   };
+
+  static handleRedirect = ({ link }) => {
+    return {
+      success: true,
+      link,
+    };
+  };
 }
 
 module.exports = Service;

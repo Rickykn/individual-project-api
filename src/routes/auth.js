@@ -39,12 +39,26 @@ router.get("/refresh-token", authorizedLoggedInUser, async (req, res) => {
   try {
     const serviceResult = await authService.keepLogin(req);
 
-    if (!serviceResult) throw serviceResult;
+    if (!serviceResult.success) throw serviceResult;
 
     return res.status(serviceResult.statusCode || 201).json({
       message: serviceResult.message,
       result: serviceResult.data,
     });
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.get("/verify/:token", async (req, res) => {
+  try {
+    const serviceResult = await authService.verifyUser(req);
+
+    if (!serviceResult.success) throw serviceResult;
+
+    return res.redirect(serviceResult.link);
   } catch (err) {
     return res.status(err.statusCode || 500).json({
       message: err.message,
