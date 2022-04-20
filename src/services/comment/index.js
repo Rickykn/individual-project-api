@@ -48,6 +48,10 @@ class CommentService extends Service {
         post_id,
       });
 
+      const user = await newComment.getUser();
+
+      newComment.dataValues.User = user.dataValues;
+
       return this.handleSuccess({
         message: "Success Comment this post",
         statusCode: 201,

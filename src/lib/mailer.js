@@ -5,8 +5,8 @@ const mailer = async ({ subject, to, text, html }) => {
     auth: {
       user: process.env.NODEMAILER_USER,
       pass: process.env.NODEMAILER_PASS,
-      host: "smtp.gmail.com",
     },
+    host: "smtp.gmail.com",
   });
   await transport.sendMail({
     subject: subject || "Test Subject",
