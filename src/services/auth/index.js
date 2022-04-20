@@ -76,11 +76,12 @@ class authService extends Service {
   };
   static login = async (req) => {
     try {
-      const { username, email, password } = req.body;
+      // const { username, password } = req.body;
+      const { credential, password } = req.body;
 
       const findUser = await User.findOne({
         where: {
-          username,
+          [Op.or]: [{ username: credential }, { email: credential }],
         },
       });
 
