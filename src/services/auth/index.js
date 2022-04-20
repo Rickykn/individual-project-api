@@ -1,8 +1,13 @@
 const Service = require("../service");
-const { User } = require("../../lib/sequelize");
+const { User, VerificationToken } = require("../../lib/sequelize");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../../lib/jwt");
+const fs = require("fs");
+const { nanoid } = require("nanoid");
+const moment = require("moment");
+const mustache = require("mustache");
+const mailer = require("../../lib/mailer");
 
 class authService extends Service {
   static register = async (req) => {
@@ -27,6 +32,32 @@ class authService extends Service {
         username,
         email,
         password: hashedPassword,
+      });
+
+      const verificationToken = nanoid(40);
+
+      await VerificationToken.create({
+        token: verificationToken,
+        user_id: newUser.id,
+        valid_until: moment().add(1, "hour"),
+        is_valid: true,
+      });
+
+      const verificationLink = `http://localhost:2000/auth/verify/${verificationToken}`;
+
+      const template = fs
+        .readFileSync(__dirname + "/../../templates/verify.html")
+        .toString();
+
+      const renderedTemplate = mustache.render(template, {
+        username,
+        verify_url: verificationLink,
+      });
+
+      await mailer({
+        to: email,
+        subject: "Verify your account!",
+        html: renderedTemplate,
       });
 
       return this.handleSuccess({
