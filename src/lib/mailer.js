@@ -7,6 +7,8 @@ const mailer = async ({ subject, to, text, html }) => {
       pass: process.env.NODEMAILER_PASS,
     },
     host: "smtp.gmail.com",
+    // host: "gsmtp.gmail.com",
+    // host: "smtp.etheral.email",
   });
   await transport.sendMail({
     subject: subject || "Test Subject",

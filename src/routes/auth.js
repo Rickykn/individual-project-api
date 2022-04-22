@@ -66,4 +66,23 @@ router.get("/verify/:token", async (req, res) => {
   }
 });
 
+router.post(
+  "/resend-verification",
+  authorizedLoggedInUser,
+  async (req, res) => {
+    try {
+      const serviceResult = await authService.resendVerificationEmail(req);
+
+      if (!serviceResult.success) throw serviceResult;
+
+      return res.status(serviceResult.statusCode || 201).json({
+        message: serviceResult.message,
+      });
+    } catch (err) {
+      return res.status(err.statusCode || 500).json({
+        message: err.message,
+      });
+    }
+  }
+);
 module.exports = router;

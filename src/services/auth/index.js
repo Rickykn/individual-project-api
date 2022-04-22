@@ -195,6 +195,60 @@ class authService extends Service {
       });
     }
   };
+
+  static resendVerificationEmail = async (req) => {
+    try {
+      const { id } = req.token;
+
+      await VerificationToken.update(
+        { is_valid: false },
+        {
+          where: {
+            is_valid: true,
+            user_id: id,
+          },
+        }
+      );
+
+      const verificationToken = nanoid(40);
+
+      await VerificationToken.create({
+        token: verificationToken,
+        is_valid: true,
+        user_id: id,
+        valid_until: moment().add(1, "hour"),
+      });
+
+      const findUser = await User.findByPk(id);
+
+      const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
+
+      const template = fs
+        .readFileSync(__dirname + "/../../templates/verify.html")
+        .toString();
+
+      const renderedTemplate = mustache.render(template, {
+        username: findUser.username,
+        verify_url: verificationLink,
+      });
+
+      await mailer({
+        to: findUser.email,
+        subject: "Verify your account!",
+        html: renderedTemplate,
+      });
+
+      return this.handleSuccess({
+        message: "Resent verification email",
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
 }
 
 module.exports = authService;
