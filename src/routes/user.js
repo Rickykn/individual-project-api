@@ -30,7 +30,7 @@ router.patch(
   }
 );
 
-router.get("/:id", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const serviceResult = await UserService.getUserById(req);
 

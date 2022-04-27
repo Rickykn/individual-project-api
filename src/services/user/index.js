@@ -58,7 +58,7 @@ class UserService extends Service {
 
   static getUserById = async (req) => {
     try {
-      const { id } = req.params;
+      const { id } = req.query;
 
       const data = await await User.findByPk(id);
 
