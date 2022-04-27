@@ -221,7 +221,7 @@ class authService extends Service {
 
       const findUser = await User.findByPk(id);
 
-      const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
+      const verificationLink = `http://localhost:2000/auth/verify/${verificationToken}`;
 
       const template = fs
         .readFileSync(__dirname + "/../../templates/verify.html")
