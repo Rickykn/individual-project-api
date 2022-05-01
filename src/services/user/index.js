@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { User } = require("../../lib/sequelize");
+const { User, Post, Like } = require("../../lib/sequelize");
 const Service = require("../service");
 
 class UserService extends Service {
@@ -60,7 +60,7 @@ class UserService extends Service {
     try {
       const { id } = req.query;
 
-      const data = await await User.findByPk(id);
+      const data = await User.findByPk(id);
 
       if (!data) {
         return this.handleError({
@@ -75,6 +75,67 @@ class UserService extends Service {
         data: data,
       });
     } catch (err) {
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static getUserPost = async (req) => {
+    try {
+      const { id } = req.query;
+
+      const findUserPost = await Post.findAll({
+        where: {
+          user_id: id,
+        },
+      });
+
+      if (!findUserPost.length) {
+        return this.handleError({
+          message: "No posts found",
+          statusCode: 400,
+        });
+      }
+
+      return this.handleSuccess({
+        message: "Find all user post",
+        data: findUserPost,
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static getUserLike = async (req) => {
+    try {
+      const { id } = req.query;
+
+      const findUserLike = await Like.findAll({
+        where: {
+          user_id: id,
+        },
+        include: Post,
+      });
+
+      if (!findUserLike.length) {
+        return this.handleError({
+          message: "User like post not found",
+          statusCode: 400,
+        });
+      }
+
+      return this.handleSuccess({
+        message: "Find all user like",
+        data: findUserLike,
+      });
+    } catch (err) {
+      console.log(err);
       return this.handleError({
         message: "Server Error",
         statusCode: 500,
