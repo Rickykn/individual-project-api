@@ -132,6 +132,12 @@ class authService extends Service {
 
       const findUser = await User.findByPk(token.id);
 
+      if (!findUser) {
+        return this.handleError({
+          message: "User not found",
+          statusCode: 400,
+        });
+      }
       delete findUser.dataValues.password;
 
       return this.handleSuccess({

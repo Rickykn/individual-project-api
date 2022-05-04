@@ -18,8 +18,16 @@ const Comment = require("../models/comment")(sequelize);
 const VerificationToken = require("../models/verification_token")(sequelize);
 
 // 1:M post and user
-Post.belongsTo(User, { foreignKey: "user_id", as: "user_posts" });
-User.hasMany(Post, { foreignKey: "user_id", as: "user_posts" });
+Post.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user_posts",
+  onDelete: "CASCADE",
+});
+User.hasMany(Post, {
+  foreignKey: "user_id",
+  as: "user_posts",
+  onDelete: "CASCADE",
+});
 
 // 1:M verification and user
 VerificationToken.belongsTo(User, { foreignKey: "user_id" });
@@ -38,12 +46,12 @@ User.belongsToMany(Post, {
 });
 User.hasMany(Like, { foreignKey: "user_id" });
 Like.belongsTo(User, { foreignKey: "user_id" });
-Post.hasMany(Like, { foreignKey: "post_id" });
-Like.belongsTo(Post, { foreignKey: "post_id" });
+Post.hasMany(Like, { foreignKey: "post_id", onDelete: "CASCADE" });
+Like.belongsTo(Post, { foreignKey: "post_id", onDelete: "CASCADE" });
 
 // 1:M post and comment
-Comment.belongsTo(Post, { foreignKey: "post_id" });
-Post.hasMany(Comment, { foreignKey: "post_id" });
+Comment.belongsTo(Post, { foreignKey: "post_id", onDelete: "CASCADE" });
+Post.hasMany(Comment, { foreignKey: "post_id", onDelete: "CASCADE" });
 
 // 1:M user and comment
 Comment.belongsTo(User, { foreignKey: "user_id" });
