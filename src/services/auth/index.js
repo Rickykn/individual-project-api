@@ -1,5 +1,9 @@
 const Service = require("../service");
-const { User, VerificationToken } = require("../../lib/sequelize");
+const {
+  User,
+  VerificationToken,
+  ForgotPasswordToken,
+} = require("../../lib/sequelize");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../../lib/jwt");
@@ -246,6 +250,111 @@ class authService extends Service {
 
       return this.handleSuccess({
         message: "Resent verification email",
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static sendForgotPasswordEmail = async (req) => {
+    try {
+      const { email } = req.body;
+
+      const findUser = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      const passwordToken = nanoid(40);
+
+      await ForgotPasswordToken.update(
+        { is_valid: false },
+        {
+          where: {
+            user_id: findUser.id,
+            is_valid: true,
+          },
+        }
+      );
+
+      await ForgotPasswordToken.create({
+        token: passwordToken,
+        valid_until: moment().add(1, "hour"),
+        is_valid: true,
+        user_id: findUser.id,
+      });
+
+      const forgotPasswordLink = `http://localhost:3000/reset_password?fp_token=${passwordToken}`;
+
+      const template = fs
+        .readFileSync(__dirname + "/../../templates/forgot.html")
+        .toString();
+
+      const renderedTemplate = mustache.render(template, {
+        username: findUser.username,
+        forgot_password_url: forgotPasswordLink,
+      });
+
+      await mailer({
+        to: findUser.email,
+        subject: "Forgot password!",
+        html: renderedTemplate,
+      });
+
+      return this.handleSuccess({
+        statusCode: 201,
+        message: "Email has been sent",
+      });
+    } catch (err) {
+      console.log(err);
+      return this.handleError({
+        message: "Server Error",
+        statusCode: 500,
+      });
+    }
+  };
+
+  static ChangePassword = async (req) => {
+    try {
+      const { password, forgotPasswordToken } = req.body;
+      console.log(password);
+      console.log(forgotPasswordToken);
+
+      const findToken = await ForgotPasswordToken.findOne({
+        where: {
+          token: forgotPasswordToken,
+          is_valid: true,
+          valid_until: {
+            [Op.gt]: moment().utc(),
+          },
+        },
+      });
+
+      if (!findToken) {
+        return this.handleError({
+          statusCode: 400,
+          message: "Invalid token",
+        });
+      }
+
+      const hashedPassword = bcrypt.hashSync(password, 5);
+
+      await User.update(
+        { password: hashedPassword },
+        {
+          where: {
+            id: findToken.user_id,
+          },
+        }
+      );
+      return this.handleSuccess({
+        statusCode: 200,
+        message: "Change password success",
       });
     } catch (err) {
       console.log(err);

@@ -16,6 +16,9 @@ const User = require("../models/user")(sequelize);
 const Like = require("../models/like")(sequelize);
 const Comment = require("../models/comment")(sequelize);
 const VerificationToken = require("../models/verification_token")(sequelize);
+const ForgotPasswordToken = require("../models/forgot_password_token")(
+  sequelize
+);
 
 // 1:M post and user
 Post.belongsTo(User, {
@@ -57,6 +60,10 @@ Post.hasMany(Comment, { foreignKey: "post_id", onDelete: "CASCADE" });
 Comment.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Comment, { foreignKey: "user_id" });
 
+// 1:M User and Forget Password Token
+ForgotPasswordToken.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(ForgotPasswordToken, { foreignKey: "user_id" });
+
 module.exports = {
   sequelize,
   Post,
@@ -64,4 +71,5 @@ module.exports = {
   Like,
   Comment,
   VerificationToken,
+  ForgotPasswordToken,
 };

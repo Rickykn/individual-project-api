@@ -85,4 +85,36 @@ router.post(
     }
   }
 );
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const serviceResult = await authService.sendForgotPasswordEmail(req);
+
+    if (!serviceResult.success) throw serviceResult;
+
+    return res.status(serviceResult.statusCode || 201).json({
+      message: serviceResult.message,
+    });
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.patch("/change-password", async (req, res) => {
+  try {
+    const serviceResult = await authService.ChangePassword(req);
+
+    if (!serviceResult.success) throw serviceResult;
+
+    return res.status(serviceResult.statusCode || 200).json({
+      message: serviceResult.message,
+    });
+  } catch (err) {
+    return res.status(err.statusCode || 500).json({
+      message: err.message,
+    });
+  }
+});
 module.exports = router;
